@@ -85,6 +85,9 @@ if(AETHER_BUILD_GUI)
         src/player-core.h
         src/playlist-model.cpp
         src/playlist-model.h
+        src/config.cpp
+        src/core/error.cpp
+        src/utils/logging.cpp
         ${CMAKE_CURRENT_BINARY_DIR}/qml.qrc
     )
 
