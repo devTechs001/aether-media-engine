@@ -1,0 +1,71 @@
+name: Documentation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - 'include/**'
+      - 'README.md'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - 'include/**'
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Doxygen
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y doxygen graphviz
+
+      - name: Install Python dependencies
+        run: |
+          pip install mkdocs mkdocs-material breathe sphinx sphinx-rtd-theme
+
+      - name: Configure CMake
+        run: cmake -B build
+
+      - name: Build API Documentation
+        run: |
+          cd build
+          cmake --build . --target docs
+
+      - name: Build MkDocs
+        run: |
+          cd docs
+          mkdocs build
+
+      - name: Upload Documentation
+        uses: actions/upload-artifact@v4
+        with:
+          name: documentation
+          path: |
+            build/docs/html/
+            docs/site/
+
+  deploy-docs:
+    runs-on: ubuntu-22.04
+    needs: build-docs
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download Documentation
+        uses: actions/download-artifact@v4
+        with:
+          name: documentation
+          path: docs_output/
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: docs_output/docs/site/

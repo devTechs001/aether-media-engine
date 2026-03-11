@@ -1,0 +1,74 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  build-release:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            artifact: aether-linux-x64
+          - os: windows-2022
+            artifact: aether-windows-x64.zip
+          - os: macos-14
+            artifact: aether-macos-universal.dmg
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: '6.6.0'
+          modules: 'qtmultimedia qtquick'
+
+      - name: Configure
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=install
+
+      - name: Build
+        run: cmake --build build --config Release -j$(nproc || sysctl -n hw.ncpu || echo $env:NUMBER_OF_PROCESSORS)
+
+      - name: Install
+        run: cmake --install build
+
+      - name: Package
+        run: cpack --config build/CPackConfig.cmake
+
+      - name: Upload Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: build/*.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  create-release:
+    runs-on: ubuntu-22.04
+    needs: build-release
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create Release Notes
+        run: |
+          echo "# AETHER Media Engine ${{ github.ref_name }}" > release_notes.md
+          echo "" >> release_notes.md
+          echo "## Changes" >> release_notes.md
+          git log --oneline $(git describe --tags --abbrev=0 HEAD^)..HEAD >> release_notes.md || true
+
+      - name: Upload Release Notes
+        uses: softprops/action-gh-release@v1
+        with:
+          body_path: release_notes.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,81 @@
+site_name: AETHER Media Engine
+site_description: Enterprise-Grade Cross-Platform AI-Powered Media Player
+site_url: https://devtechs001.github.io/aether-media-engine
+
+repo_name: devTechs001/aether-media-engine
+repo_url: https://github.com/devTechs001/aether-media-engine
+
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    primary: indigo
+    accent: indigo
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.indexes
+    - toc.integrate
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+  icon:
+    repo: fontawesome/brands/github
+  logo: assets/logo.svg
+  favicon: assets/favicon.ico
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Introduction: guides/getting-started.md
+    - Building: guides/building.md
+    - Configuration: guides/configuration.md
+    - Plugins: guides/plugins.md
+  - Architecture:
+    - Overview: architecture/overview.md
+    - Components: architecture/components.md
+    - Data Flow: architecture/data-flow.md
+  - API Reference:
+    - Core: api/core/
+    - Plugins: api/plugins/
+  - Specifications:
+    - Codecs: specifications/codec-support.md
+    - Protocols: specifications/protocol-support.md
+    - Platforms: specifications/platform-support.md
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - toc:
+      permalink: true
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: google
+
+extra:
+  version:
+    provider: mike
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/devTechs001/aether-media-engine
+    - icon: fontawesome/brands/discord
+      link: https://discord.gg/aether
+
+copyright: Copyright &copy; 2024 DarkHat

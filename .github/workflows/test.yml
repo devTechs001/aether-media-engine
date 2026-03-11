@@ -1,0 +1,82 @@
+name: Test
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            qt6-base-dev \
+            qt6-multimedia-dev \
+            libgtest-dev \
+            libbenchmark-dev
+
+      - name: Configure
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -DENABLE_SANITIZERS=ON
+
+      - name: Build Tests
+        run: cmake --build build --target aether_tests -j$(nproc)
+
+      - name: Run Tests
+        working-directory: build
+        run: ctest --output-on-failure --verbose
+
+  integration-tests:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            qt6-base-dev \
+            qt6-multimedia-dev
+
+      - name: Configure
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug
+
+      - name: Build Integration Tests
+        run: cmake --build build --target integration_tests -j$(nproc)
+
+      - name: Run Integration Tests
+        working-directory: build
+        run: ctest -R integration --output-on-failure
+
+  codec-tests:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            qt6-base-dev \
+            qt6-multimedia-dev \
+            libavcodec-dev \
+            libavformat-dev \
+            libavutil-dev
+
+      - name: Configure
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug
+
+      - name: Build Codec Tests
+        run: cmake --build build --target codec_tests -j$(nproc)
+
+      - name: Run Codec Tests
+        working-directory: build
+        run: ctest -R codec --output-on-failure

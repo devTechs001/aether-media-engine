@@ -1,0 +1,115 @@
+name: Build
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  BUILD_TYPE: Release
+  CMAKE_VERSION: 3.28.0
+  NINJA_VERSION: 1.11.1
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        compiler:
+          - { cxx: g++, c: gcc, name: GCC }
+          - { cxx: clang++, c: clang, name: Clang }
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            qt6-base-dev \
+            qt6-multimedia-dev \
+            qt6-quick-dev \
+            qt6-svg-dev \
+            libvulkan-dev \
+            libwayland-dev \
+            libxkbcommon-dev \
+            libssl-dev \
+            libcurl4-openssl-dev
+
+      - name: Configure CMake
+        run: |
+          cmake -B build \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+            -DCMAKE_CXX_COMPILER=${{ matrix.compiler.cxx }} \
+            -DCMAKE_C_COMPILER=${{ matrix.compiler.c }}
+
+      - name: Build
+        run: cmake --build build --config ${{ env.BUILD_TYPE }} -j$(nproc)
+
+      - name: Test
+        working-directory: build
+        run: ctest --build-config ${{ env.BUILD_TYPE }} --output-on-failure
+
+  build-windows:
+    runs-on: windows-2022
+    strategy:
+      matrix:
+        compiler:
+          - { name: MSVC, generator: "Visual Studio 17 2022" }
+          - { name: Clang, generator: Ninja, cxx: clang-cl }
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: '6.6.0'
+          modules: 'qtmultimedia qtquick'
+
+      - name: Configure CMake
+        run: |
+          cmake -B build `
+            -G "${{ matrix.compiler.generator }}" `
+            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} `
+            -DCMAKE_CXX_COMPILER=${{ matrix.compiler.cxx || '' }}
+
+      - name: Build
+        run: cmake --build build --config ${{ env.BUILD_TYPE }} -j$env:NUMBER_OF_PROCESSORS
+
+  build-macos:
+    runs-on: macos-14
+    strategy:
+      matrix:
+        arch: [x86_64, arm64]
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: '6.6.0'
+          modules: 'qtmultimedia qtquick'
+
+      - name: Configure CMake
+        run: |
+          cmake -B build \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+            -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }}
+
+      - name: Build
+        run: cmake --build build --config ${{ env.BUILD_TYPE }} -j$(sysctl -n hw.ncpu)
+
+      - name: Test
+        working-directory: build
+        run: ctest --build-config ${{ env.BUILD_TYPE }} --output-on-failure

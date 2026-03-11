@@ -1,0 +1,88 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+[*.md]
+trim_trailing_whitespace = false
+
+[*.yml]
+indent_size = 2
+
+[*.yaml]
+indent_size = 2
+
+[*.json]
+indent_size = 2
+
+[*.xml]
+indent_size = 2
+
+[*.cmake]
+indent_size = 4
+
+[CMakeLists.txt]
+indent_size = 4
+
+[*.sh]
+indent_size = 2
+
+[Makefile]
+indent_style = tab
+
+[*.{c,cpp,h,hpp,hh,hxx}]
+indent_size = 4
+indent_style = space
+
+[*.{py,pyx}]
+indent_size = 4
+indent_style = space
+
+[*.{js,ts,tsx,jsx}]
+indent_size = 2
+indent_style = space
+
+[*.{rs,toml}]
+indent_size = 4
+indent_style = space
+
+[*.{go,mod,sum}]
+indent_size = 4
+indent_style = tab
+
+[*.{java,kt}]
+indent_size = 4
+indent_style = space
+
+[*.{swift}]
+indent_size = 4
+indent_style = space
+
+[*.{rb,rake}]
+indent_size = 2
+indent_style = space
+
+[*.{cs}]
+indent_size = 4
+indent_style = space
+
+[*.{lua}]
+indent_size = 2
+indent_style = space
+
+[*.{sql}]
+indent_size = 2
+indent_style = space
+
+[*.{html,css,scss,sass,less}]
+indent_size = 2
+indent_style = space
+
+[*.{glsl,hlsl,metal}]
+indent_size = 4
+indent_style = space
